@@ -1,0 +1,195 @@
+#各种库和模型的导入
+import torch                    #有关深度学习的库
+import torch.nn as nn           #nn模块用于构建神经网络
+import torch.optim as optim     #优化算法的模块
+from sklearn.model_selection import train_test_split     #划分训练集和数据集的工具
+
+#TensorDataset可以将数据和标签组合方便访问
+#DataLoader批量加载数据的工具，可以将数据分批次。随机打乱。并行加载。遍历数据集
+from torch.utils.data import DataLoader, TensorDataset
+
+#将数据填充到相同长度以符合神经网络模型的输入规则
+from torch.nn.utils.rnn import pad_sequence
+
+
+#数据（权游！！！！YYDS！！！）
+data = [
+    ("我觉得龙妈真的很有魅力！", 1),
+    ("小恶魔的智慧总是让我惊叹。", 1),
+    ("结局真是令人失望，太仓促了。", 0),
+    ("布兰居然成了国王，太意外了！", 1),
+    ("瑟曦真是令人讨厌的角色。", 0),
+    ("琼恩雪诺真的是完美的英雄形象。", 1),
+    ("我不明白编剧为什么要让夜王这么快死去。", 0),
+    ("红袍女巫的魔法场景真的很震撼。", 1),
+    ("龙妈黑化的剧情发展让我难以接受。", 0),
+    ("战斗场景拍得很壮观，特别是临冬城之战。", 1),
+    ("雪诺的身世揭开时真的很震撼！", 1),
+    ("我觉得珊莎的成长让人感到欣慰。", 1),
+    ("部分角色的结局实在太遗憾了。", 0),
+    ("故事后期感觉逻辑有点混乱。", 0),
+    ("小指头的计谋真是让人胆寒。", 1),
+    ("狼家的团聚场景感动了我。", 1),
+    ("无垢者军队的忠诚和勇气令人钦佩。", 1),
+    ("很多角色都没有得到应有的结局。", 0),
+    ("剧情太多转折，角色性格变化很突兀。", 0),
+    ("乔弗里真是个让人厌恶的角色。", 0),
+    ("龙妈在战场上的气势真的让人惊叹！", 1),
+    ("结局太仓促了，我对这部剧失望了。", 0),
+    ("小恶魔的机智一直是亮点。", 1),
+    ("布兰的王位有些牵强。", 0),
+    ("瑟曦的结局太轻描淡写了。", 0),
+    ("琼恩雪诺的勇敢令人钦佩。", 1),
+    ("夜王被击败得太轻易了。", 0),
+    ("红袍女巫的角色非常神秘。", 1),
+    ("龙妈黑化让我难以接受。", 0),
+    ("临冬城之战的场面非常震撼！", 1),
+    ("珊莎的成长故事很励志。", 1),
+    ("小指头的阴谋让人心惊。", 1),
+    ("无垢者军队很忠诚，令人敬佩。", 1),
+    ("很多角色的结局没有交代清楚。", 0),
+    ("剧情转折太多，角色变化太突兀。", 0),
+    ("乔弗里是最让人讨厌的角色之一。", 0),
+    ("狼家的团聚场面让我感动。", 1),
+    ("瑟曦的阴谋确实令人不寒而栗。", 1),
+    ("龙妈的结局简直让人心碎。", 0),
+    ("夜王和异鬼的设定真的很酷。", 1),
+    ("结局对雪诺太不公平了。", 0),
+    ("龙妈和雪诺的互动很感人。", 1),
+    ("布蕾妮对詹姆的感情让我动容。", 1),
+    ("整个故事后期有些混乱。", 0),
+    ("剧情的发展显得有些强行。", 0),
+    ("龙的出现给战斗场面增色不少。", 1),
+    ("雪诺的身世之谜揭晓非常震撼。", 1),
+    ("夜王被杀得太快了，没了悬念。", 0),
+    ("詹姆的角色转变让人很失望。", 0),
+    ("山姆的忠诚和智慧令人敬佩。", 1),
+    ("我真的喜欢艾莉亚的暗杀技能！", 1),
+    ("角色死亡太随意了。", 0),
+    ("铁王座的争夺充满悬念。", 1),
+    ("提利昂的幽默让我忍俊不禁。", 1),
+    ("瑟曦的野心是她的毁灭之源。", 1),
+    ("每个家族的标志都很有象征意义。", 1),
+    ("最后一季的编剧水平大大下降了。", 0),
+    ("丹妮莉丝的黑化太突然了。", 0),
+    ("巨人破门的场景十分震撼！", 1),
+    ("我喜欢故事中的权谋斗争。", 1),
+    ("珊莎的坚韧令人钦佩。", 1),
+    ("绝望之战真的扣人心弦。", 1),
+    ("詹姆和瑟曦的结局过于潦草。", 0),
+    ("雪诺的忠诚让我很感动。", 1),
+    ("小恶魔的谋略真是一大看点。", 1),
+    ("布兰的角色发展不太符合预期。", 0),
+    ("艾莉亚的成长之路很励志。", 1),
+    ("红毒蛇的死太令人震惊了。", 1),
+    ("黑水河之战拍得很精彩。", 1),
+    ("龙妈的复仇场面真是酣畅淋漓！", 1),
+    ("乔弗里的暴虐让人难以忍受。", 0),
+    ("我喜欢冰与火之歌的史诗感。", 1)
+]
+
+
+#处理文本标签并添加词汇表
+
+
+#  *为解包操作符，zip将各条数据相同位置的数据打包成在一起，形成一个可迭代的整体
+texts, labels = zip(*data)
+
+#建立属于每个单词的索引（1 2 3 4……）
+vocab = {word: idx + 1 for idx, word in enumerate(set(" ".join(texts).split()))}
+
+#将不认识的单词全分配0为索引，但该方法无法反向对应
+#优化方法：记录下未知词并为其动态分配索引（正在尝试ing）
+vocab["<UNK>"] = 0
+
+#将文本和标签转换成张量储存
+#Tensor类似于高纬数组/矩阵，方便计算且计算对CPU友好并支持GPU加速
+#将文本的词用索引中序号替换后，将一句话变成张量如：[1，1，4，5，1，4，0]
+def text_to_tensor(text):
+    return torch.tensor([vocab.get(word, 0) for word in text.split()], dtype=torch.long)
+
+#将数据中每条文本都转换成张量形式（此时张量长度不一）
+X = [text_to_tensor(text) for text in texts]
+
+#补0填充到相同长度
+X = pad_sequence(X, batch_first=True, padding_value=0)
+
+#将标签也转换成张量，且标签值存为浮点数形式（此为二分类任务，后续用的损失函数要求输入为浮点数）
+#p.s.如多分类任务则会用到交叉商损失函数此时整形也可
+y = torch.tensor(labels, dtype=torch.float)
+#y如[1.,0.,1.,1.]其中每个0./1.对应着与其位置一致的文本张量,eg: 0. 对应 [1,1,4,5,1,4,0]
+
+
+# 划分数据集
+#30%用于测试，道格拉斯说42我就写42岂不是很没面？
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=24)
+
+#封装数据，封装后数据集中每条形如：（tensor([1,9,6,8,0,7,2]),tensor([0.]))
+train_dataset = TensorDataset(X_train, y_train)
+test_dataset = TensorDataset(X_test, y_test)
+
+#将数据按批次加载，batch 小批量的意思，batch_size=2 每批2条数据，shuffle 打乱顺序的意思
+train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=2)
+
+# 定义模型
+#初始化后的self表示当前数据/实例本身
+#vocab_size类似输入层的入口数量，应与词汇表大小一致
+#embed，output表示输入和输出向量的维度
+class SimpleTextClassifier(nn.Module):
+    def __init__(self, vocab_size, embed_dim, output_dim):
+        super(SimpleTextClassifier, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)   #以数学的方式输入句子
+        self.fc = nn.Linear(embed_dim, output_dim)             #分析出结果
+    
+    def forward(self, x):
+        embedded = self.embedding(x).mean(dim=1)  # 计算平均值
+        return self.fc(embedded)
+
+# 模型参数
+vocab_size = len(vocab)                                #词汇表大小（输入数量）
+embed_dim = 10                                         #定义嵌入维度（每个单词的向量长度用于描述词的含义）
+output_dim = 1                                         #答案的格式（二分类中输出分数）
+model = SimpleTextClassifier(vocab_size, embed_dim, output_dim)          #初始化模型
+
+# 超参数设置
+learning_rate = 0.0005                     #学习率（调整参数时的幅度）
+num_epochs = 25                            #训练20轮，类似于理解20遍数据
+loss_fn = nn.BCEWithLogitsLoss()           #定义损失函数，分数越小越好
+ #优化器 
+ #model.parameters()  优化哪些部分
+ #lr=learning_rate    每次调整的幅度
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)          
+
+# 训练模型
+for epoch in range(num_epochs):
+    model.train()                              #开启训练
+    total_loss = 0                             #用来记录损失
+    for X_batch, y_batch in train_loader:      #进行小块的训练
+        optimizer.zero_grad()                  #清零上次的梯度，避免累加！！！！！！！
+
+        #model(X_batch)：让模型根据X_batch预测，输出一个分数
+        #.squeeze(1)：去掉多余维度，使输出形状与 y_batch 匹配
+        output = model(X_batch).squeeze(1)
+        loss = loss_fn(output, y_batch)
+        loss.backward()                        #反向传播，计算损失对模型参数的梯度
+        optimizer.step()                       #让优化器更新模型参数
+        total_loss += loss.item()              #算损失
+
+    #每5步汇报一次进度
+    if (epoch + 1) % 5 == 0:
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss/len(train_loader):.4f}')
+
+# 测试模型
+model.eval()                                  #火力全开
+correct = 0
+
+#关闭梯度计算功能，测试不用记录和优化
+with torch.no_grad():
+    for X_batch, y_batch in test_loader:               #分小批次完成测试
+        output = model(X_batch).squeeze(1)
+        preds = (torch.sigmoid(output) > 0.5).float()  #sigmoid函数将数值压缩到（0，1）
+        correct += (preds == y_batch).sum().item()     #正确数
+        
+accuracy = correct / len(test_dataset)                 #正确率
+print(f'Accuracy: {accuracy:.4f}')
